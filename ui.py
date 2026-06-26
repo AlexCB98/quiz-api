@@ -42,6 +42,7 @@ class QuizInterface:
             image=true_img,
             highlightthickness=0,
             borderwidth=0,
+            command=self.true_check
         )
         self.true_button.grid(row=2, column=0, padx=20)
 
@@ -49,6 +50,7 @@ class QuizInterface:
             image=false_img,
             highlightthickness=0,
             borderwidth=0,
+            command=self.false_check
         )
         self.false_button.grid(row=2, column=1, padx=20)
 
@@ -57,5 +59,32 @@ class QuizInterface:
         self.window.mainloop()
 
     def get_next_question(self):
-        q_text = self.quiz.next_question()
-        self.canvas.itemconfig(self.question_text, text= q_text)
+        self.canvas.config(bg='white')
+
+        if self.quiz.still_has_questions():
+            self.label.config(text=f'Score: {self.quiz.score}')
+            q_text = self.quiz.next_question()
+            self.canvas.itemconfig(self.question_text, text= q_text)
+        else:
+            self.canvas.itemconfig(
+                self.question_text,
+                text="You've reached the end of the quiz."
+            )
+            self.true_button.config(state='disabled')
+            self.false_button.config(state='disabled')
+
+
+    def true_check(self):
+        is_right = self.quiz.check_answer('True')
+        self.feedback(is_right)
+
+    def false_check(self):
+        is_right = self.quiz.check_answer('False')
+        self.feedback(is_right)
+
+    def feedback(self, is_right):
+        if is_right:
+            self.canvas.config(bg='green')
+        else:
+            self.canvas.config(bg='red')
+        self.window.after(1000, self.get_next_question)
